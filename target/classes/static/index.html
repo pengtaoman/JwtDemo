@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <title>JWT Spring Security Demo</title>
+
+   <!-- Latest compiled and minified CSS -->
+   <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+
+   <!-- Optional theme -->
+   <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
+   <link rel="stylesheet" href="./node_modules/element-ui/lib/theme-default/index.css">
+
+   <script type="text/javascript">
+      var APP_PATH = '/jwt';
+
+   </script>
+</head>
+<body>
+<div class="container" >
+   <h1>用户登录</h1>
+   <div id="myDialog">
+   <div class="alert alert-danger" id="notLoggedIn">您还没有登录
+      <el-button type="text" @click="dialogVisible = true">注册</el-button>
+   </div>
+
+<!--新增注册表单-->
+
+   <el-dialog
+           title="用户注册"
+           :visible.sync="dialogVisible"
+           size="tiny"
+
+   >
+      <el-form ref="form" :model="form" label-width="80px">
+
+         <el-form-item
+                 label="用户名"
+                 prop="username"
+                 :rules="[{ required: true, message: '请输入用户名' }]">
+
+            <el-input v-model="form.username"></el-input>
+         </el-form-item>
+         <el-form-item
+                 prop="email"
+                 label="邮箱"
+                 :rules="[
+                     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+                     { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
+                   ]">
+            <el-input v-model="form.email"></el-input>
+         </el-form-item>
+
+         <el-form-item label="地址">
+            <el-select v-model="form.region" placeholder="请选择地址">
+               <el-option label="区域一" value="shanghai"></el-option>
+               <el-option label="区域二" value="beijing"></el-option>
+            </el-select>
+         </el-form-item>
+
+         <el-form-item label="出生日期">
+            <el-col :span="11">
+               <el-date-picker type="date" placeholder="选择日期" v-model="form.date1" style="width: 100%;"></el-date-picker>
+            </el-col>
+
+         </el-form-item>
+         <el-form-item label="密码">
+            <el-input v-model="form.password" type="password"></el-input>
+         </el-form-item>
+         <el-form-item>
+            <el-button type="primary" @click="onSubmit">立即创建</el-button>
+            <el-button @click="dialogVisible = false">取消</el-button>
+         </el-form-item>
+      </el-form>
+
+
+     <!-- <span slot="footer" class="dialog-footer">
+
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>-->
+   </el-dialog>
+   </div>
+
+
+
+
+
+
+
+
+   <div class="row">
+      <div class="col-md-6">
+         <div class="panel panel-default" id="login">
+            <div class="panel-heading">
+               <h3 class="panel-title">请登录</h3>
+            </div>
+            <div class="panel-body">
+               <form id="loginForm">
+                  <div class="form-group">
+                     <input type="text" class="form-control" id="exampleInputEmail1" placeholder="username"
+                            required name="username">
+                  </div>
+                  <div class="form-group">
+                     <input type="password" class="form-control" id="exampleInputPassword1"
+                            placeholder="password" required name="password">
+                  </div>
+                  <!---->
+                  <div class="form-group">
+                     <input type="text" name="jcaptcha" id="jcaptcha" class="sy-1" autocomplete="off"
+                            placeholder="验证码" style="width: 150px;" required /> <span>
+                                   <img id="jcaptchaimg"
+                                        src="/jwt/resources/jcaptcha.jpg" onclick="refleshCaptcha();" style="" />
+                     </span>
+                  </div>
+
+                  <button type="submit" class="btn btn-default">login</button>
+               </form>
+            </div>
+         </div>
+
+         <div id="userInfo">
+            <div class="panel panel-default">
+               <div class="panel-heading">
+                  <h3 class="panel-title">Authenticated user</h3>
+               </div>
+               <div class="panel-body">
+                  <div id="userInfoBody"></div>
+                  <button type="button" class="btn btn-default" id="logoutButton">logout</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <div class="col-md-6">
+         <div class="btn-group" role="group" aria-label="..." style="margin-bottom: 16px;">
+            <button type="button" class="btn btn-default" id="exampleServiceBtn">call example service</button>
+            <button type="button" class="btn btn-default" id="adminServiceBtn">call admin protected service</button>
+         </div>
+         <div class="panel panel-default">
+            <div class="panel-heading">
+               <h3 class="panel-title">Response:</h3>
+            </div>
+            <div class="panel-body">
+               <pre id="response"></pre>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <div class="row">
+      <div id="loggedIn" class="col-md-6">
+         <div class="panel panel-default">
+            <div class="panel-heading">
+               <h3 class="panel-title">Token information</h3>
+            </div>
+            <div class="panel-body" id="loggedInBody"></div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="loginErrorModal">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Login unsuccessful</h4>
+         </div>
+         <div class="modal-body"></div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+         </div>
+      </div><!-- /.modal-content -->
+   </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="./node_modules/jwt-decode/build/jwt-decode.min.js"></script>
+<script src="js/client.js"></script>
+
+<!-- 新增js-->
+<script src="./node_modules/vue/dist/vue.js"></script>
+<script src="./node_modules/element-ui/lib/index.js"></script>
+<script src="js/register.js"></script>
+
+
+
+
+<script type="text/javascript">
+   function refleshCaptcha () {
+      document.getElementById("jcaptchaimg").src=APP_PATH + "/resources/jcaptcha.jpg?rd="+ Math.round(Math.random(100)*100000);
+   }
+
+</script>
+</body>
+</html>

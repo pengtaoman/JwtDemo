@@ -1,0 +1,44 @@
+# config context path to "/" by setting an empty string
+server:
+  servlet:
+    context-path: /jwt
+  port: 8999
+
+# JACKSON
+spring:
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+
+jwt:
+  header: Authorization
+  secret: mySecret
+  expiration: 604800
+  route:
+    authentication:
+      path: auth
+      refresh: refresh
+spring:
+  jpa:
+    hibernate:
+      # possible values: validate | update | create | create-drop
+      dialect: org.hibernate.dialect.MySQLDialect
+      show_sql: true
+      #use_sql_comments: true
+      #format_sql: true
+      #ddl-auto: create
+  datasource:
+   # url: jdbc:mysql://localhost:3306/jwtauth?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/jwtdb?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: pt--11PT
+    driver-class-name: com.mysql.jdbc.Driver
+#  mvc:
+#    view:
+#      prefix: /WEB-INF/jsp/
+#      suffix: .jsp
+#
+#logging:
+#  level:
+#    org.springframework:
+#      security: DEBUG
